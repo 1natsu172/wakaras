@@ -1,0 +1,14 @@
+diff --git a/node_modules/@1natsu/wait-element/dist/es/index.js b/node_modules/@1natsu/wait-element/dist/es/index.js
+index 3f1a3f1..4cc9f7d 100644
+--- a/node_modules/@1natsu/wait-element/dist/es/index.js
++++ b/node_modules/@1natsu/wait-element/dist/es/index.js
+@@ -308,7 +308,8 @@ var waitElement = function waitElement(selector, options) {
+     });
+     var configs = {
+       childList: true,
+-      subtree: true
++      subtree: true,
++      attributes: true,
+     }; // Checking already element existed.
+ 
+     var element = checkElement(selector);
