@@ -71,7 +71,17 @@ window.addEventListener('load', async () => {
     }
 
     if (kairiReasonSaveButton) {
-      // kairiReasonSaveButton.click()
+      // 乖離理由セーブボタン押して
+      kairiReasonSaveButton.click()
+      // アラートが出るのでOK押したら時間差で乖離理由が記録されて履歴表示される
+      const kairiReasonHistory = await waitElement('#modal-reference')
+      if (kairiReasonHistory) {
+        const modalCloseButton = document.querySelector<HTMLButtonElement>(
+          '#modalDivergence-close',
+        )
+        // セーブできてたらモーダル閉じる
+        modalCloseButton?.click()
+      }
     }
   }
 })
