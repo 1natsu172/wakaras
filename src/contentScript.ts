@@ -1,4 +1,4 @@
-import { browser, Runtime } from 'webextension-polyfill-ts'
+// import { browser, Runtime } from 'webextension-polyfill-ts'
 import waitElement from '@1natsu/wait-element'
 import moji from 'moji'
 
