@@ -1,6 +1,7 @@
 // import { browser, Runtime } from 'webextension-polyfill-ts'
 import waitElement from '@1natsu/wait-element'
 import moji from 'moji'
+import { browser } from 'webextension-polyfill-ts'
 
 console.log('wakaras script start')
 
@@ -46,12 +47,15 @@ window.addEventListener('load', async () => {
       '#divergenceSave',
     )
 
+    const { wakarasTemplateOptions } = await browser.storage.sync.get(
+      'wakarasTemplateOptions',
+    )
     const reasonSelectDescription = (() => {
-      const templateSelects = Object.entries(reasonOptionMap).map(
-        ([key, value]) => {
-          return `${key}: ${value}`
-        },
-      )
+      const templateSelects = (wakarasTemplateOptions as [
+        { key: string; value: string },
+      ]).map(({ key, value }: { key: string; value: string }) => {
+        return `${key}: ${value}`
+      })
 
       const selects = [
         createKairiDataDescription(theDayKairiData),
@@ -66,7 +70,17 @@ window.addEventListener('load', async () => {
     console.log(kairiReasonSelected)
 
     if (kairiReasonSelected && kairiReasonInput) {
-      const kairiReason = convertToKairiReason(kairiReasonSelected)
+      const reasonOptionMap = (wakarasTemplateOptions as {
+        key: string
+        value: string
+      }[]).reduce(
+        (acc, current) => ({ ...acc, [current.key]: current.value }),
+        {},
+      )
+      const kairiReason = convertToKairiReason(
+        kairiReasonSelected,
+        reasonOptionMap,
+      )
       kairiReasonInput.value = kairiReason
     }
 
@@ -154,16 +168,19 @@ ${date}
  */
 ////////////////////////////////////////////////////////////////
 
-const reasonOptionMap = {
-  '1': '退勤後にキーボード清掃のため再度PCを開いたため',
-  '2': '退勤後にオンライン雑談をしていたため',
-  '3': '退勤後に技術の勉強をしていたため',
-  '4': '退勤後にOSS活動をしていたため',
-} as const
+// const reasonOptionMap = {
+//   '1': '退勤後にキーボード清掃のため再度PCを開いたため',
+//   '2': '退勤後にオンライン雑談をしていたため',
+//   '3': '退勤後に技術の勉強をしていたため',
+//   '4': '退勤後にOSS活動をしていたため',
+// } as const
 
-type ReasonOptionKeys = keyof typeof reasonOptionMap
+type ReasonOptionKeys = '1' | '2' | '3' | '4'
 
-function convertToKairiReason(keyOrReason: string) {
+function convertToKairiReason(
+  keyOrReason: string,
+  reasonOptionMap: { [key: string]: string },
+) {
   // 全角文字 to 半角文字
   const HEkeyOrReason = moji(keyOrReason).convert('ZE', 'HE').toString()
 

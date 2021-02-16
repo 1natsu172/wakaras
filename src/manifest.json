@@ -13,6 +13,7 @@
       "js": ["contentScript.ts"]
     }
   ],
-  "permissions": ["activeTab", "tabs"],
-  "host_permissions": ["https://*.miteras-wv.jp/*"]
+  "permissions": ["activeTab", "tabs", "storage"],
+  "host_permissions": ["https://*.miteras-wv.jp/*"],
+  "options_page": "options.html"
 }
