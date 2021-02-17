@@ -127,14 +127,15 @@ function getKairiDataFromRow(rowNode: HTMLTableRowElement): KairiData {
     )
   }
   const [
-    date,
-    _name,
-    kaishiDakoku,
-    kaishiJissai,
-    taikinDakoku,
-    taikinJissai,
-    _kintaiMinyuryoku,
-    kairiTime,
+    date, // 1
+    _name, // 2
+    kaishiDakoku, //3
+    kaishiJissai, // 4
+    taikinDakoku, // 5
+    taikinJissai, // 6
+    _kintaiMinyuryoku, // 7
+    _musousaJikan, // 8
+    kairiTime, // 9
   ] = cols.map((col) => col.innerText)
   return {
     date,
