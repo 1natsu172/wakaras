@@ -16,89 +16,97 @@ function isUserDetailInfo(path: string) {
   return path.includes('UserDetailInfo')
 }
 
-window.addEventListener('load', async () => {
+window.addEventListener('load', () => {
   if (isUserDetailInfo(window.location.pathname)) {
-    const kairiButton = document.querySelector<HTMLElement>(
+    const kairiButtons = document.querySelectorAll<HTMLElement>(
       '#kibanaOpen.btn-warning',
     )
-
-    if (!kairiButton) {
-      return
-    }
-
-    const theDayTableRowElement = kairiButton.closest('tr')
-    if (!theDayTableRowElement) {
-      throw new Error('rowの親DOM見つからへん')
-    }
-
-    const theDayKairiData = getKairiDataFromRow(theDayTableRowElement)
-
-    kairiButton.click()
-
-    // モーダルの出現を待つ
-    const modalOpended = await waitElement(
-      '#modalDivergence.modal.fade.in',
-    ).then(() => delay(300))
-
-    const kairiReasonInput = document.querySelector<HTMLInputElement>(
-      '#reasontext',
-    )
-    const kairiReasonSaveButton = document.querySelector<HTMLButtonElement>(
-      '#divergenceSave',
-    )
-
-    const { wakarasTemplateOptions } = await browser.storage.sync.get(
-      'wakarasTemplateOptions',
-    )
-    const reasonSelectDescription = (() => {
-      const templateSelects = (wakarasTemplateOptions as [
-        { key: string; value: string },
-      ]).map(({ key, value }: { key: string; value: string }) => {
-        return `${key}: ${value}`
-      })
-
-      const selects = [
-        createKairiDataDescription(theDayKairiData),
-        ...templateSelects,
-      ]
-
-      return selects.join('\n')
-    })()
-
-    const kairiReasonSelected = prompt(reasonSelectDescription)
-
-    console.log(kairiReasonSelected)
-
-    if (kairiReasonSelected && kairiReasonInput) {
-      const reasonOptionMap = (wakarasTemplateOptions as {
-        key: string
-        value: string
-      }[]).reduce(
-        (acc, current) => ({ ...acc, [current.key]: current.value }),
-        {},
-      )
-      const kairiReason = convertToKairiReason(
-        kairiReasonSelected,
-        reasonOptionMap,
-      )
-      kairiReasonInput.value = kairiReason
-    }
-
-    if (kairiReasonSaveButton) {
-      // 乖離理由セーブボタン押して
-      kairiReasonSaveButton.click()
-      // アラートが出るのでOK押したら時間差で乖離理由が記録されて履歴表示される
-      const kairiReasonHistory = await waitElement('#modal-reference')
-      if (kairiReasonHistory) {
-        const modalCloseButton = document.querySelector<HTMLButtonElement>(
-          '#modalDivergence-close',
-        )
-        // セーブできてたらモーダル閉じる
-        modalCloseButton?.click()
-      }
-    }
+    kairiButtons.forEach((button) => {
+      button.addEventListener('click', OnPrompt)
+    })
   }
 })
+
+async function OnPrompt(event: MouseEvent) {
+  event.preventDefault()
+
+  const kairiButton = event.target as HTMLElement
+
+  if (!kairiButton) {
+    return
+  }
+
+  const theDayTableRowElement = kairiButton.closest('tr')
+
+  if (!theDayTableRowElement) {
+    throw new Error('rowの親DOM見つからへん')
+  }
+
+  const theDayKairiData = getKairiDataFromRow(theDayTableRowElement)
+
+  // モーダルの出現を待つ
+  const modalOpended = await waitElement(
+    '#modalDivergence.modal.fade.in',
+  ).then(() => delay(300))
+
+  const kairiReasonInput = document.querySelector<HTMLInputElement>(
+    '#reasontext',
+  )
+  const kairiReasonSaveButton = document.querySelector<HTMLButtonElement>(
+    '#divergenceSave',
+  )
+
+  const { wakarasTemplateOptions } = await browser.storage.sync.get(
+    'wakarasTemplateOptions',
+  )
+  const reasonSelectDescription = (() => {
+    const templateSelects = (wakarasTemplateOptions as [
+      { key: string; value: string },
+    ]).map(({ key, value }: { key: string; value: string }) => {
+      return `${key}: ${value}`
+    })
+
+    const selects = [
+      createKairiDataDescription(theDayKairiData),
+      ...templateSelects,
+    ]
+
+    return selects.join('\n')
+  })()
+
+  const kairiReasonSelected = prompt(reasonSelectDescription)
+
+  console.log(kairiReasonSelected)
+
+  if (kairiReasonSelected && kairiReasonInput) {
+    const reasonOptionMap = (wakarasTemplateOptions as {
+      key: string
+      value: string
+    }[]).reduce(
+      (acc, current) => ({ ...acc, [current.key]: current.value }),
+      {},
+    )
+    const kairiReason = convertToKairiReason(
+      kairiReasonSelected,
+      reasonOptionMap,
+    )
+    kairiReasonInput.value = kairiReason
+  }
+
+  if (kairiReasonSaveButton) {
+    // 乖離理由セーブボタン押して
+    kairiReasonSaveButton.click()
+    // アラートが出るのでOK押したら時間差で乖離理由が記録されて履歴表示される
+    const kairiReasonHistory = await waitElement('#modal-reference')
+    if (kairiReasonHistory) {
+      const modalCloseButton = document.querySelector<HTMLButtonElement>(
+        '#modalDivergence-close',
+      )
+      // セーブできてたらモーダル閉じる
+      modalCloseButton?.click()
+    }
+  }
+}
 
 ////////////////////////////////////////////////////////////////
 /**
